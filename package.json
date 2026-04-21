@@ -26,5 +26,8 @@
   "devDependencies": {
     "@yao-pkg/pkg": "^6.17.0",
     "esbuild": "^0.28.0"
+  },
+  "overrides": {
+    "into-stream": "^6.0.0"
   }
 }
