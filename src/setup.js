@@ -19,6 +19,9 @@ export async function runSetupWizard(existingConfig) {
   console.log("Application ID を取得してください。");
   console.log("https://discord.com/developers/applications");
   console.log("");
+  console.log("x.gd APIキーはアートワークURLの短縮に使用します（任意）。");
+  console.log("https://x.gd/api-register でAPIキーを取得できます。");
+  console.log("");
 
   const rl = createInterface({
     input: process.stdin,
@@ -51,6 +54,12 @@ export async function runSetupWizard(existingConfig) {
       existingConfig?.webhookUrl || ""
     );
 
+    const xgdApiKey = await ask(
+      rl,
+      "x.gd APIキー (空欄でスキップ)",
+      existingConfig?.xgdApiKey || ""
+    );
+
     const largeImageKey = await ask(
       rl,
       "Rich Presence 大きい画像キー",
@@ -68,6 +77,7 @@ export async function runSetupWizard(existingConfig) {
     console.log(`  Application ID: ${clientId}`);
     console.log(`  Now Playing URL: ${nowPlayingUrl}`);
     if (webhookUrl) console.log(`  Webhook URL: ${webhookUrl}`);
+    if (xgdApiKey) console.log(`  x.gd APIキー: ${xgdApiKey}`);
     console.log(`  画像キー: ${largeImageKey}`);
     console.log("");
 
@@ -81,6 +91,7 @@ export async function runSetupWizard(existingConfig) {
       clientId,
       nowPlayingOverlayUrl: nowPlayingUrl,
       webhookUrl: webhookUrl || "",
+      xgdApiKey: xgdApiKey || "",
       presence: {
         largeImageKey,
         largeImageText,
