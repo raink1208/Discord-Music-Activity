@@ -2,6 +2,18 @@ import RPC from "discord-rpc";
 import { resolveArtworkUrl } from "./artwork.js";
 import { log, debug, error } from "./logger.js";
 
+/**
+ * {SONG}, {ARTIST}, {LABEL}, {BPM} を実際の値に置換する
+ * 値が空の場合は空文字列になる
+ */
+function formatText(template, { song, artist, label, bpm }) {
+  return template
+    .replace(/\{SONG\}/g, song || "")
+    .replace(/\{ARTIST\}/g, artist || "")
+    .replace(/\{LABEL\}/g, label || "")
+    .replace(/\{BPM\}/g, bpm ? String(bpm) : "");
+}
+
 let client = null;
 let connected = false;
 
@@ -26,16 +38,12 @@ export async function updatePresence({ song, artist, label, artwork, bpm, config
 
   // Webhook経由でアートワークをDiscord CDNにアップロードし、x.gdで短縮
   const resolvedArtwork = await resolveArtworkUrl(artwork, config.webhookUrl, config.xgdApiKey);
-  const largeImage = resolvedArtwork || config.presence.largeImageKey;
 
   debug(`プレゼンス更新: ${song} / ${artist}`);
   debug(`アートワーク URL: ${resolvedArtwork || '(none)'}`);
 
   const assets = {
     large_image: resolvedArtwork,
-    large_text: config.presence.largeImageText,
-    small_image: config.presence.smallImageKey,
-    small_text: config.presence.smallImageText,
   };
 
   // BPMやレーベル情報があればlarge_textに追加
@@ -44,13 +52,18 @@ export async function updatePresence({ song, artist, label, artwork, bpm, config
     assets.large_text = extra;
   }
 
+  const vars = { song, artist, label, bpm };
+  const nameText    = formatText(config.presence.nameFormat    || "{SONG}",            vars);
+  const detailsText = formatText(config.presence.detailsFormat || "🎵 {SONG}",         vars);
+  const stateText   = formatText(config.presence.stateFormat   || "🎤 {ARTIST}",       vars);
+
   await client.request("SET_ACTIVITY", {
     pid: process.pid,
     activity: {
       type: 2,
-      name: song,
-      details: `🎵 ${song}`,
-      state: `🎤 ${artist}`,
+      name: nameText,
+      details: detailsText,
+      state: stateText,
       assets,
       instance: false,
     },

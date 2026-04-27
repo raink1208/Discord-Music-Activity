@@ -60,25 +60,15 @@ export async function runSetupWizard(existingConfig) {
       existingConfig?.xgdApiKey || ""
     );
 
-    const largeImageKey = await ask(
-      rl,
-      "Rich Presence 大きい画像キー",
-      existingConfig?.presence?.largeImageKey || "music"
-    );
-
-    const largeImageText = await ask(
-      rl,
-      "Rich Presence 大きい画像テキスト",
-      existingConfig?.presence?.largeImageText || "Now Playing"
-    );
-
     console.log("");
     console.log("設定内容:");
     console.log(`  Application ID: ${clientId}`);
     console.log(`  Now Playing URL: ${nowPlayingUrl}`);
     if (webhookUrl) console.log(`  Webhook URL: ${webhookUrl}`);
     if (xgdApiKey) console.log(`  x.gd APIキー: ${xgdApiKey}`);
-    console.log(`  画像キー: ${largeImageKey}`);
+    console.log("");
+    console.log("presence の詳細設定は config.json で変更できます。");
+    console.log("  nameFormat / detailsFormat / stateFormat: {SONG} {ARTIST} {LABEL} {BPM} が使用可能");
     console.log("");
 
     const confirm = await ask(rl, "この設定で保存しますか? (Y/n)", "Y");
@@ -93,10 +83,9 @@ export async function runSetupWizard(existingConfig) {
       webhookUrl: webhookUrl || "",
       xgdApiKey: xgdApiKey || "",
       presence: {
-        largeImageKey,
-        largeImageText,
-        smallImageKey: existingConfig?.presence?.smallImageKey || "play",
-        smallImageText: existingConfig?.presence?.smallImageText || "再生中",
+        nameFormat: existingConfig?.presence?.nameFormat || "{SONG}",
+        detailsFormat: existingConfig?.presence?.detailsFormat || "🎵 {SONG}",
+        stateFormat: existingConfig?.presence?.stateFormat || "🎤 {ARTIST}",
       },
     };
   } finally {
